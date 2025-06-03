@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Python Quiz Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card {
+            border: 2px solid orange;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 15px;
+            background-color: #fdfdfd;
+        }
+
+        .profile-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-wrapper img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 15px;
+            height: 15px;
+            background-color: #00cc00;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        h3,
+        h2,
+        p {
+            margin: 5px;
+        }
+
+        .question-box {
+            background-color: #fff9c4;
+            text-align: left;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid orange;
+            word-break: break-word;
+        }
+
+        .code-question {
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .normal-question {
+            font-family: 'Arial', sans-serif;
+            white-space: normal;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .options div {
+            width: 48%;
+            margin: 5px 0;
+            font-size: 18px;
+            cursor: pointer;
+            word-wrap: break-word;
+            text-align: center;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .options div:hover {
+            color: orange;
+        }
+
+        .correct {
+            color: green !important;
+        }
+
+        .wrong {
+            color: red !important;
+        }
+
+        .answer-reveal {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .swap {
+            font-family: 'Caveat', cursive;
+            font-size: 22px;
+            color: orange;
+            margin-top: 20px;
+        }
+
+        .socials i {
+            margin: 0 8px;
+            font-size: 22px;
+            color: #333;
+        }
+
+        #download-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-family: 'Caveat', cursive;
+            font-size: 20px;
+            border: 2px solid orange;
+            border-radius: 10px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        #download-btn:hover {
+            background-color: orange;
+            color: white;
+        }
+
+        #toggle-input {
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background-color: orange;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #quizInputArea {
+            display: none;
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 10px;
+            border-radius: 15px;
+            background-color: #fff7e6;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #quizInput,
+        select {
+            width: 100%;
+            padding: 12px;
+            font-family: monospace;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        #generateQuiz,
+        #generateAI {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        @media (max-width: 500px) {
+            .options div {
+                width: 100%;
+            }
+
+            .card,
+            #quizInputArea {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="toggle-input" onclick="toggleInput()">Generate New Quiz</button>
+
+    <div id="quizInputArea">
+        <select id="category">
+            <option value="strings">Strings</option>
+            <option value="loops">Loops</option>
+            <option value="functions">Functions</option>
+            <option value="lists">Lists</option>
+        </select>
+
+        <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+
+        <textarea id="quizInput" placeholder="Enter quiz in format... 
+Question 1: What is the correct file extension for Python files?
+A) .pt
+B) .pyt
+C) .py
+D) .python
+Answer: C) .py"></textarea>
+
+        <br>
+        <button id="generateQuiz" onclick="generateFromInput()">Generate</button>
+        <button id="generateAI" onclick="generateFromAI()">Generate Quiz using AI</button>
+    </div>
+
+    <div id="quizCard" class="card">
+        <div class="profile-wrapper">
+            <img src="rikeshcodesdaily.jpg" alt="profile">
+            <div class="online-dot"></div>
+        </div>
+        <h3>@rikeshcodesdaily</h3>
+        <h3 style="color: orange;">PYTHON QUIZ</h3>
+        <p>By: <strong>Rikesh Dahal</strong></p>
+
+        <h3>Question:</h3>
+        <div class="question-box" id="questionBox">>>> a = "Python"<br>>> b = a[6]<br>>> print(b)</div>
+
+        <h3>Options:</h3>
+        <div class="options" id="optionsBox">
+            <div onclick="checkAnswer(this, 'a')">a) n</div>
+            <div onclick="checkAnswer(this, 'b')">b) None</div>
+            <div onclick="checkAnswer(this, 'c')">c) Error</div>
+            <div onclick="checkAnswer(this, 'd')">d) 0</div>
+        </div>
+
+        <div class="answer-reveal" id="resultBox"></div>
+
+        <p>Follow us on:</p>
+        <div class="socials">
+            <i class="fab fa-tiktok"></i>
+            <i class="fab fa-facebook"></i>
+            <i class="fab fa-instagram"></i>
+            <i class="fab fa-github"></i>
+            <i class="fab fa-linkedin"></i>
+        </div>
+        <div class="swap">SWAP >></div>
+    </div>
+
+    <button id="download-btn" onclick="downloadCard()">Download Image</button>
+
+    <script>
+        let correctAnswer = 'c';
+        let attempts = 0;
+
+        function checkAnswer(elem, chosen) {
+            attempts++;
+            if (chosen === correctAnswer) {
+                elem.classList.add("correct");
+                document.getElementById("resultBox").innerText = "✅ Correct!";
+                disableAll();
+            } else {
+                elem.classList.add("wrong");
+                if (attempts >= 2) {
+                    document.getElementById("resultBox").innerText = `❌ Correct Answer: ${document.getElementById("correctAnswerFull").value}`;
+                    disableAll();
+                }
+            }
+        }
+
+        function disableAll() {
+            document.querySelectorAll(".options div").forEach(el => el.style.pointerEvents = "none");
+        }
+
+        function downloadCard() {
+            html2canvas(document.getElementById("quizCard")).then(canvas => {
+                const link = document.createElement("a");
+                link.download = "python-quiz.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+
+        function toggleInput() {
+            const area = document.getElementById("quizInputArea");
+            area.style.display = area.style.display === "none" ? "block" : "none";
+        }
+
+        function generateFromInput() {
+            const input = document.getElementById("quizInput").value;
+            const match = input.match(/Question\s*\d+:\s*(.*?)\nA\)\s*(.*?)\nB\)\s*(.*?)\nC\)\s*(.*?)\nD\)\s*(.*?)\nAnswer:\s*([A-D])\)\s*(.*)/);
+
+            if (!match) {
+                alert("Invalid format!");
+                return;
+            }
+
+            const [, question, optA, optB, optC, optD, answerLetter, answerText] = match;
+            const answers = { A: 'a', B: 'b', C: 'c', D: 'd' };
+
+            // Check if the question contains code (>>>)
+            const isCodeQuestion = question.includes(">>>");
+            const questionBox = document.getElementById("questionBox");
+            questionBox.innerHTML = question.replace(/\n/g, "<br>");
+            questionBox.classList.remove("code-question", "normal-question");
+            questionBox.classList.add(isCodeQuestion ? "code-question" : "normal-question");
+
+            document.getElementById("optionsBox").innerHTML = `
+                <div onclick="checkAnswer(this, 'a')">a) ${optA}</div>
+                <div onclick="checkAnswer(this, 'b')">b) ${optB}</div>
+                <div onclick="checkAnswer(this, 'c')">c) ${optC}</div>
+                <div onclick="checkAnswer(this, 'd')">d) ${optD}</div>
+            `;
+            document.getElementById("resultBox").innerText = "";
+            correctAnswer = answers[answerLetter.toUpperCase()];
+            attempts = 0;
+
+            if (!document.getElementById("correctAnswerFull")) {
+                const hidden = document.createElement("input");
+                hidden.type = "hidden";
+                hidden.id = "correctAnswerFull";
+                document.body.appendChild(hidden);
+            }
+
+            document.getElementById("correctAnswerFull").value = `${answerLetter}) ${answerText}`;
+        }
+
+        async function generateFromAI() {
+            const category = document.getElementById("category").value;
+            const difficulty = document.getElementById("difficulty").value;
+
+            const prompt = `Generate ONE ${difficulty} Python multiple-choice quiz question about ${category}.
+
+FORMAT EXACTLY AS BELOW:
+Question 1: <question text>
+A) <option A>
+B) <option B>
+C) <option C>
+D) <option D>
+Answer: <correct letter>) <exact correct option text>
+
+STRICT RULES:
+- Include ALL FOUR options: A), B), C), and D) with corresponding text.
+- Do NOT add any explanation, intro, or extra text.
+- The final answer MUST match exactly one of the four options above.
+- Do NOT skip any letter or re-order the options.
+- For code-based questions, use >>> to indicate Python code lines.`;
+
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer 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"
+                    },
+                    body: JSON.stringify({
+                        model: "llama3-70b-8192",
+                        messages: [{ role: "user", content: prompt }]
+                    })
+                });
+
+                const data = await res.json();
+                const output = data.choices?.[0]?.message?.content.trim() || "No response from AI.";
+
+                // Validation: Must contain all A–D options and answer
+                if (
+                    output.includes("A)") &&
+                    output.includes("B)") &&
+                    output.includes("C)") &&
+                    output.includes("D)") &&
+                    output.includes("Answer:")
+                ) {
+                    document.getElementById("quizInput").value = output;
+                    generateFromInput();
+                } else {
+                    document.getElementById("quizInput").value = "⚠️ AI response was incomplete or invalid. Please try again.";
+                }
+
+            } catch (err) {
+                console.error("Error:", err);
+                document.getElementById("quizInput").value = "⚠️ Failed to fetch quiz from AI.";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
